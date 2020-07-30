@@ -55,6 +55,8 @@ final class PH_Home_Reports {
         // Include required files
         $this->includes();
 
+        add_action( 'admin_init', array( $this, 'show_home_report_settings') );
+
         add_action( 'admin_notices', array( $this, 'home_reports_error_notices') );
 
         add_filter( 'propertyhive_property_media_meta_boxes', array( $this, 'add_home_reports_meta_box' ) );
@@ -64,7 +66,32 @@ final class PH_Home_Reports {
 
         add_action( "propertyhive_property_imported_dezrez_json", array( $this, 'import_dezrez_json_home_reports' ), 10, 2 );
 
-        add_filter( 'ph_rtdf_send_request_data', array( $this, 'send_home_reports_to_rtdf' ), 10, 2 );
+        $current_settings = get_option( 'propertyhive_home_reports', array() );
+
+        if ( !isset($current_settings['include_in_portal_feeds']) || ( isset($current_settings['include_in_portal_feeds']) && $current_settings['include_in_portal_feeds'] == 1 ) )
+        {
+            add_filter( 'ph_rtdf_send_request_data', array( $this, 'send_home_reports_to_rtdf' ), 10, 2 );
+            add_filter( 'ph_zoopla_rtdf_send_request_data', array( $this, 'send_home_reports_to_zoopla_rtdf' ), 10, 2 );
+        }
+    }
+
+    public function show_home_report_settings()
+    {
+        if ( class_exists('PH_Realtimefeed') || class_exists('PH_Zooplarealtimefeed') )
+        {
+            add_filter( 'propertyhive_settings_tabs_array', array( $this, 'add_settings_tab' ), 19 );
+            add_action( 'propertyhive_settings_' . $this->id, array( $this, 'output' ) );
+            add_action( 'propertyhive_settings_save_' . $this->id, array( $this, 'save' ) );
+
+            add_filter( "plugin_action_links_" . plugin_basename( __FILE__ ), array( $this, 'plugin_add_settings_link' ) );
+        }
+    }
+
+    public function plugin_add_settings_link( $links )
+    {
+        $settings_link = '<a href="' . admin_url('admin.php?page=ph-settings&tab=home-reports') . '">' . __( 'Settings' ) . '</a>';
+        array_push( $links, $settings_link );
+        return $links;
     }
 
     public function send_home_reports_to_rtdf($request_data, $post_id)
@@ -79,8 +106,6 @@ final class PH_Home_Reports {
                 $url = wp_get_attachment_url( $attachment_id );
                 if ($url !== FALSE)
                 {
-                    //$attachment_data = wp_prepare_attachment_for_js( $attachment_id );
-
                     $media = array(
                         'media_type' => 3,
                         'media_url' => $url,
@@ -91,6 +116,31 @@ final class PH_Home_Reports {
                     $request_data['property']['media'][] = $media;
 
                     ++$i;
+                }
+            }
+        }
+
+        return $request_data;
+    }
+
+    public function send_home_reports_to_zoopla_rtdf($request_data, $post_id)
+    {
+        $attachment_ids = get_post_meta( $post_id, '_home_reports', TRUE );
+
+        if ( is_array($attachment_ids) && !empty($attachment_ids) )
+        {
+            foreach ($attachment_ids as $attachment_id)
+            {
+                $url = wp_get_attachment_url( $attachment_id );
+                if ($url !== FALSE)
+                {
+                    $media = array(
+                        'url' => $url,
+                        'type' => 'brochure',
+                        'caption' => 'Home Report',
+                    );
+
+                    $request_data['content'][] = $media;
                 }
             }
         }
@@ -541,6 +591,78 @@ final class PH_Home_Reports {
         }
 
         return $actions;
+    }
+
+    /**
+     * Add a new settings tab to the Property Hive settings tabs array.
+     *
+     * @param array $settings_tabs Array of Property Hive setting tabs & their labels
+     * @return array $settings_tabs Array of Property Hive setting tabs & their labels
+     */
+    public function add_settings_tab( $settings_tabs ) {
+        $settings_tabs[$this->id] = $this->label;
+        return $settings_tabs;
+    }
+
+    /**
+     * Uses the Property Hive admin fields API to output settings.
+     *
+     * @uses propertyhive_admin_fields()
+     * @uses self::get_settings()
+     */
+    public function output() {
+
+        global $current_section;
+        
+        propertyhive_admin_fields( self::get_home_reports_settings() );
+    }
+
+    /**
+     * Get home reports settings
+     *
+     * @return array Array of settings
+     */
+    public function get_home_reports_settings() {
+
+        global $post;
+
+        $current_settings = get_option( 'propertyhive_home_reports', array() );
+
+        $settings = array(
+
+            array( 'title' => __( 'Home Reports Settings', 'propertyhive' ), 'type' => 'title', 'desc' => '', 'id' => 'home_reports_settings' )
+
+        );
+
+        $settings[] = array(
+            'title'     => __( 'Include Home Reports In Portal Feeds', 'propertyhive' ),
+            'id'        => 'include_in_portal_feeds',
+            'type'      => 'checkbox',
+            'default'   => ( !isset($current_settings['include_in_portal_feeds']) || ( isset($current_settings['include_in_portal_feeds']) && $current_settings['include_in_portal_feeds'] == 1 ) ? 'yes' : ''),
+        );
+
+        $settings[] = array( 'type' => 'sectionend', 'id' => 'home_reports_settings');
+
+        return $settings;
+    }
+
+    /**
+     * Uses the Property Hive options API to save settings.
+     *
+     * @uses propertyhive_update_options()
+     * @uses self::get_settings()
+     */
+    public function save() {
+
+        $existing_propertyhive_home_reports = get_option( 'propertyhive_home_reports', array() );
+
+        $propertyhive_home_reports = array(
+            'include_in_portal_feeds' => ( (isset($_POST['include_in_portal_feeds'])) ? $_POST['include_in_portal_feeds'] : '' ),
+        );
+
+        $propertyhive_home_reports = array_merge( $existing_propertyhive_home_reports, $propertyhive_home_reports );
+
+        update_option( 'propertyhive_home_reports', $propertyhive_home_reports );
     }
 }
 
