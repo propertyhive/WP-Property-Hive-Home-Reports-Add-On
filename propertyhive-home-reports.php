@@ -445,7 +445,7 @@ final class PH_Home_Reports {
                       
                   });
                   
-                  jQuery(\'.ph_upload_home_report_button\').live(\'click\', function( event ){
+                  jQuery(\'body\').on(\'click\', \'.ph_upload_home_report_button\', function( event ){
                  
                     event.preventDefault();
                  
