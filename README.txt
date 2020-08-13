@@ -3,9 +3,9 @@ Contributors: PropertyHive,BIOSTALL
 Tags: propertyhive, property hive, property, real estate, software, estate agents, estate agent, home report, scotland
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=N68UHATHAEDLN&lc=GB&item_name=BIOSTALL&no_note=0&cn=Add%20special%20instructions%20to%20the%20seller%3a&no_shipping=1&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
 Requires at least: 3.8
-Tested up to: 5.4.2
+Tested up to: 5.5
 Stable tag: trunk
-Version: 1.0.3
+Version: 1.0.4
 Homepage: http://wp-property-hive.com/addons/home-reports/
 
 This add on for Property Hive adds the ability for your users to upload home reports to properties
@@ -27,6 +27,10 @@ The manual installation method involves downloading the Property Hive Home Repor
 Updating should work like a charm; as always though, ensure you backup your site just in case.
 
 == Changelog ==
+
+= 1.0.4 =
+* Make compatible with WP 5.5 following recent jQuery changes
+* Declared support for WordPress 5.5
 
 = 1.0.3 =
 * Include Home Reports in Zoopla RTDF add on requests
