@@ -66,6 +66,8 @@ final class PH_Home_Reports {
 
         add_action( "propertyhive_property_imported_dezrez_json", array( $this, 'import_dezrez_json_home_reports' ), 10, 2 );
 
+        add_action( "propertyhive_property_imported_vebra_api_xml", array( $this, 'import_vebra_api_xml_home_reports' ), 10, 2 );
+
         $current_settings = get_option( 'propertyhive_home_reports', array() );
 
         if ( !isset($current_settings['include_in_portal_feeds']) || ( isset($current_settings['include_in_portal_feeds']) && $current_settings['include_in_portal_feeds'] == 1 ) )
@@ -253,6 +255,141 @@ final class PH_Home_Reports {
                                 update_post_meta( $id, '_imported_url', $url);
 
                                 ++$new;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        update_post_meta( $post_id, '_home_reports', $media_ids );
+
+        // Loop through $previous_media_ids, check each one exists in $media_ids, and if it doesn't then delete
+        if ( is_array($previous_media_ids) && !empty($previous_media_ids) )
+        {
+            foreach ( $previous_media_ids as $previous_media_id )
+            {
+                if ( !in_array($previous_media_id, $media_ids) )
+                {
+                    if ( wp_delete_attachment( $previous_media_id, TRUE ) !== FALSE )
+                    {
+                        ++$deleted;
+                    }
+                }
+            }
+        }
+    }
+
+    public function import_vebra_api_xml_home_reports($post_id, $property)
+    {
+        $media_ids = array();
+        $new = 0;
+        $existing = 0;
+        $deleted = 0;
+        $previous_media_ids = get_post_meta( $post_id, '_home_reports', TRUE );
+
+        $property_attributes = $property->attributes();
+
+        if (isset($property->files) && !empty($property->files))
+        {
+            foreach ($property->files as $files)
+            {
+                if (!empty($files->file))
+                {
+                    foreach ($files->file as $file)
+                    {
+                        $file_attributes = $file->attributes();
+
+                        if (
+                            (string)$file_attributes['type'] == '8'
+                            &&
+                            (
+                                substr( strtolower((string)$file->url), 0, 2 ) == '//' ||
+                                substr( strtolower((string)$file->url), 0, 4 ) == 'http'
+                            )
+                            &&
+                            substr((string)$file->name, 0, 11) === 'Home Report'
+                        )
+                        {
+                            $url = (string)$file->url;
+                            $description = (string)$file->name;
+
+                            $filename = basename( $url );
+
+                            // Check, based on the URL, whether we have previously imported this media
+                            $imported_previously = false;
+                            $imported_previously_id = '';
+                            if ( is_array($previous_media_ids) && !empty($previous_media_ids) )
+                            {
+                                foreach ( $previous_media_ids as $previous_media_id )
+                                {
+                                    if ( get_post_meta( $previous_media_id, '_imported_url', TRUE ) == $url )
+                                    {
+                                        $imported_previously = true;
+                                        $imported_previously_id = $previous_media_id;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if ($imported_previously)
+                            {
+                                $media_ids[] = $imported_previously_id;
+
+                                if ( $description != '' )
+                                {
+                                    $my_post = array(
+                                        'ID'             => $imported_previously_id,
+                                        'post_title'     => $description,
+                                    );
+
+                                    wp_update_post( $my_post );
+                                }
+
+                                ++$existing;
+                            }
+                            else
+                            {
+                                $tmp = download_url( $url );
+
+                                $file_id = (string)$file_attributes['id'];
+                                $property_id = (string)$property_attributes['id'];
+
+                                $exploded_filename = explode(".", $filename);
+                                $ext = 'pdf';
+                                if (strlen($exploded_filename[count($exploded_filename)-1]) == 3)
+                                {
+                                    $ext = $exploded_filename[count($exploded_filename)-1];
+                                }
+                                $name = $property_id . '_' . $file_id . '.' . $ext;
+
+                                $file_array = array(
+                                    'name' => $name,
+                                    'tmp_name' => $tmp
+                                );
+
+                                // Check for download errors
+                                if ( is_wp_error( $tmp ) )
+                                {
+                                    @unlink( $file_array[ 'tmp_name' ] );
+                                }
+                                else
+                                {
+                                    $id = media_handle_sideload( $file_array, $post_id, $description );
+
+                                    // Check for handle sideload errors.
+                                    if ( is_wp_error( $id ) )
+                                    {
+                                        @unlink( $file_array['tmp_name'] );
+                                    }
+                                    else
+                                    {
+                                        $media_ids[] = $id;
+
+                                        update_post_meta( $id, '_imported_url', $url);
+
+                                        ++$new;
+                                    }
+                                }
                             }
                         }
                     }
