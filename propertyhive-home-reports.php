@@ -307,7 +307,7 @@ final class PH_Home_Reports {
                                 substr( strtolower((string)$file->url), 0, 4 ) == 'http'
                             )
                             &&
-                            substr((string)$file->name, 0, 11) === 'Home Report'
+                            substr(strtolower((string)$file->name), 0, 11) === 'home report'
                         )
                         {
                             $url = (string)$file->url;
