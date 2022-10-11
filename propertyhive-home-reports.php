@@ -3,7 +3,7 @@
  * Plugin Name: Property Hive Home Reports Add On
  * Plugin Uri: http://wp-property-hive.com/addons/home-reports/
  * Description: Add On for Property Hive allowing users to save add Home Reports, a legal requirement for properties in Scotland
- * Version: 1.0.5
+ * Version: 1.0.6
  * Author: PropertyHive
  * Author URI: http://wp-property-hive.com
  */
@@ -17,7 +17,7 @@ final class PH_Home_Reports {
     /**
      * @var string
      */
-    public $version = '1.0.5';
+    public $version = '1.0.6';
 
     /**
      * @var Property Hive The single instance of the class
@@ -101,7 +101,7 @@ final class PH_Home_Reports {
 
         if ( ! isset( $_POST['property_id'] ) || ( isset( $_POST['property_id'] ) && empty( $_POST['property_id'] ) ) )
         {
-            $errors[] = __( 'Property ID is a required field and must be supplied when requesting a home report', 'propertyhive' ) . ': ' . $key;
+            $errors[] = __( 'Property ID is a required field and must be supplied when requesting a Home Report', 'propertyhive' ) . ': ' . $key;
         }
         else
         {
@@ -262,7 +262,7 @@ final class PH_Home_Reports {
             {
                 $subject = __( 'Multiple Property Enquiry', 'propertyhive' ) . ': ' . count($property_ids) . ' Properties';
             }*/
-            $message = __( "You have received a home report request via your website. Please find details of the request below", 'propertyhive' ) . "\n\n";
+            $message = __( "You have received a Home Report request via your website. Please find details of the request below", 'propertyhive' ) . "\n\n";
             
             $message .= ( count($property_ids) > 1 ? __( 'Properties', 'propertyhive' ) : __( 'Property', 'propertyhive' ) ) . ":\n";
             foreach ( $property_ids as $property_id )
@@ -1097,7 +1097,7 @@ final class PH_Home_Reports {
         
         <h2><?php _e( 'Request Home Report', 'propertyhive' ); ?></h2>
         
-        <p><?php _e( 'Please complete the form below and the home report will be emailed to you.', 'propertyhive' ); ?></p>
+        <p><?php _e( 'Please complete the form below and the Home Report will be emailed to you.', 'propertyhive' ); ?></p>
         
         <?php $this->data_capture_form(); ?>
         
