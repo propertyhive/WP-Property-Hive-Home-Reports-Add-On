@@ -1,12 +1,11 @@
 === PropertyHive Home Reports ===
 Contributors: PropertyHive,BIOSTALL
-Tags: propertyhive, property hive, property, real estate, software, estate agents, estate agent, home report, scotland
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=N68UHATHAEDLN&lc=GB&item_name=BIOSTALL&no_note=0&cn=Add%20special%20instructions%20to%20the%20seller%3a&no_shipping=1&currency_code=GBP&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
+Tags: home report, scotland, propertyhive, property hive, property, real estate, software, estate agents, estate agent
 Requires at least: 3.8
-Tested up to: 6.0.2
+Tested up to: 6.5.3
 Stable tag: trunk
 Version: 1.0.6
-Homepage: http://wp-property-hive.com/addons/home-reports/
+Homepage: https://wp-property-hive.com/addons/home-reports/
 
 This add on for Property Hive adds the ability for your users to upload home reports to properties
 

@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Property Hive Home Reports Add On
- * Plugin Uri: http://wp-property-hive.com/addons/home-reports/
+ * Plugin Uri: https://wp-property-hive.com/addons/home-reports/
  * Description: Add On for Property Hive allowing users to save add Home Reports, a legal requirement for properties in Scotland
  * Version: 1.0.6
  * Author: PropertyHive
- * Author URI: http://wp-property-hive.com
+ * Author URI: https://wp-property-hive.com
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
