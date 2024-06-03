@@ -79,8 +79,9 @@ final class PH_Home_Reports {
         add_filter( 'propertyhive_single_property_actions', array( $this, 'add_home_report_to_actions' ) );
 
         add_action( "propertyhive_property_imported_dezrez_json", array( $this, 'import_dezrez_json_home_reports' ), 10, 2 );
-
         add_action( "propertyhive_property_imported_vebra_api_xml", array( $this, 'import_vebra_api_xml_home_reports' ), 10, 2 );
+        add_filter( "propertyhive_rtdf_property_due_import", array( $this, 'change_rtdf_media_type_of_home_reports' ) );
+        add_action( "propertyhive_property_imported_rtdf", array( $this, 'import_rtdf_home_reports' ), 10, 2 );
 
         $current_settings = get_option( 'propertyhive_home_reports', array() );
 
@@ -762,6 +763,174 @@ final class PH_Home_Reports {
                                         ++$new;
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        update_post_meta( $post_id, '_home_reports', $media_ids );
+
+        // Loop through $previous_media_ids, check each one exists in $media_ids, and if it doesn't then delete
+        if ( is_array($previous_media_ids) && !empty($previous_media_ids) )
+        {
+            foreach ( $previous_media_ids as $previous_media_id )
+            {
+                if ( !in_array($previous_media_id, $media_ids) )
+                {
+                    if ( wp_delete_attachment( $previous_media_id, TRUE ) !== FALSE )
+                    {
+                        ++$deleted;
+                    }
+                }
+            }
+        }
+    }
+
+    public function change_rtdf_media_type_of_home_reports($property)
+    {
+        $new_media = array();
+
+        if ( isset($property['media']) && is_array($property['media']) && !empty($property['media']) )
+        {
+            foreach ( $property['media'] as $image )
+            {
+                if ( 
+                    isset($image['media_url']) && $image['media_url'] != ''
+                    &&
+                    (
+                        substr( strtolower($image['media_url']), 0, 2 ) == '//' || 
+                        substr( strtolower($image['media_url']), 0, 4 ) == 'http'
+                    )
+                    &&
+                    isset($image['media_type']) && $image['media_type'] == 3
+                    &&
+                    isset($image['caption']) && strpos( strtolower($image['caption']), 'home report' ) !== FALSE
+                )
+                {
+                    // 111 is used by function below
+                    $image['media_type'] = 111;
+                }
+
+                $new_media[] = $image;
+            }
+        }
+
+        $property['media'] = $new_media;
+
+        return $property;
+    }
+
+    public function import_rtdf_home_reports($post_id, $property)
+    {
+        $media_ids = array();
+        $new = 0;
+        $existing = 0;
+        $deleted = 0;
+        $previous_media_ids = get_post_meta( $post_id, '_home_reports', TRUE );
+        if ( isset($property['media']) && is_array($property['media']) && !empty($property['media']) )
+        {
+            foreach ( $property['media'] as $image )
+            {
+                if ( 
+                    isset($image['media_url']) && $image['media_url'] != ''
+                    &&
+                    (
+                        substr( strtolower($image['media_url']), 0, 2 ) == '//' || 
+                        substr( strtolower($image['media_url']), 0, 4 ) == 'http'
+                    )
+                    &&
+                    isset($image['media_type']) && $image['media_type'] == 111 // Used 111 as a random number
+                    &&
+                    isset($image['caption']) && strpos( strtolower($image['caption']), 'home report' ) !== FALSE
+                )
+                {
+                    // This is a URL
+                    $url = $image['media_url'];
+                    $description = $image['caption'];
+                    $modified = ( isset($image['media_update_date']) && !empty($image['media_update_date']) ) ? $image['media_update_date'] : '';
+                    
+                    $filename = basename( $url );
+
+                    // Check, based on the URL, whether we have previously imported this media
+                    $imported_previously = false;
+                    $imported_previously_id = '';
+                    if ( is_array($previous_media_ids) && !empty($previous_media_ids) )
+                    {
+                        foreach ( $previous_media_ids as $previous_media_id )
+                        {
+                            if ( 
+                                get_post_meta( $previous_media_id, '_imported_url', TRUE ) == $url
+                                &&
+                                (
+                                    get_post_meta( $previous_media_id, '_modified', TRUE ) == '' 
+                                    ||
+                                    (
+                                        get_post_meta( $previous_media_id, '_modified', TRUE ) != '' &&
+                                        get_post_meta( $previous_media_id, '_modified', TRUE ) == $modified
+                                    )
+                                )
+                            )
+                            {
+                                $imported_previously = true;
+                                $imported_previously_id = $previous_media_id;
+                                break;
+                            }
+                        }
+                    }
+
+                    if ($imported_previously)
+                    {
+                        $media_ids[] = $imported_previously_id;
+
+                        if ( $description != '' )
+                        {
+                            $my_post = array(
+                                'ID'             => $imported_previously_id,
+                                'post_title'     => $description,
+                            );
+
+                            // Update the post into the database
+                            wp_update_post( $my_post );
+                        }
+
+                        ++$existing;
+                    }
+                    else
+                    {
+                        $tmp = download_url( $url );
+
+                        $file_array = array(
+                            'name' => $filename,
+                            'tmp_name' => $tmp
+                        );
+
+                        // Check for download errors
+                        if ( is_wp_error( $tmp ) ) 
+                        {
+                            @unlink( $file_array[ 'tmp_name' ] );
+
+                            //$this->add_error( 'An error occurred whilst importing ' . $url . '. The error was as follows: ' . $tmp->get_error_message(), $property['RoleId'] );
+                        }
+                        else
+                        {
+                            $id = media_handle_sideload( $file_array, $post_id, $description );
+                            
+                            // Check for handle sideload errors.
+                            if ( is_wp_error( $id ) ) 
+                            {
+                                @unlink( $file_array['tmp_name'] );
+                                
+                                //$this->add_error( 'ERROR: An error occurred whilst importing ' . $url . '. The error was as follows: ' . $id->get_error_message(), $property['RoleId'] );
+                            }
+                            else
+                            {
+                                $media_ids[] = $id;
+
+                                update_post_meta( $id, '_imported_url', $url);
+                                update_post_meta( $id, '_modified', $modified);
+
+                                ++$new;
                             }
                         }
                     }
