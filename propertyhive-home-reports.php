@@ -23,6 +23,16 @@ final class PH_Home_Reports {
      * @var Property Hive The single instance of the class
      */
     protected static $_instance = null;
+
+    /**
+     * @var string
+     */
+    public $id = '';
+
+    /**
+     * @var string
+     */
+    public $label = '';
     
     /**
      * Main Property Hive Home Reports Instance
