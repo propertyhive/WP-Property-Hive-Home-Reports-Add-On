@@ -2,9 +2,9 @@
 Contributors: PropertyHive,BIOSTALL
 Tags: home report, scotland, propertyhive, property hive, property, real estate, software, estate agents, estate agent
 Requires at least: 3.8
-Tested up to: 6.5.3
+Tested up to: 6.6.1
 Stable tag: trunk
-Version: 1.0.7
+Version: 1.0.8
 Homepage: https://wp-property-hive.com/addons/home-reports/
 
 This add on for Property Hive adds the ability for your users to upload home reports to properties
@@ -28,6 +28,10 @@ The manual installation method involves downloading the Property Hive Home Repor
 Updating should work like a charm; as always though, ensure you backup your site just in case.
 
 == Changelog ==
+
+= 1.0.8 =
+* Added new 'Home Report' Elementor widget so button can be placed on property page if building template in Elementor
+* Declared support for WordPress 6.6.1
 
 = 1.0.7 =
 * Import home reports from RTDF imports where the sent as brochures with the caption 'Home Report'
