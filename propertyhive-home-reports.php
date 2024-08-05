@@ -98,6 +98,37 @@ final class PH_Home_Reports {
 
         add_action( 'wp_ajax_propertyhive_request_home_report', array( $this, 'ajax_propertyhive_home_report_request' ) );
         add_action( 'wp_ajax_nopriv_propertyhive_request_home_report', array( $this, 'ajax_propertyhive_home_report_request' ) );
+
+        add_filter( 'propertyhive_elementor_widgets', array( $this, 'add_home_report_elementor_widget' ), 10, 1 );
+        add_filter( 'propertyhive_elementor_widget_directory', array( $this, 'select_home_report_elementor_widget_directory' ), 10, 2 );
+    }
+
+    public function add_home_report_elementor_widget( $widgets )
+    {
+        // Don't insert widget if it's already in the list
+        if ( array_search( 'Property Home Report Link', $widgets ) === false )
+        {
+            // If the full description widget is in the list, insert it after that. If not, add it on the end
+            $desc_position = array_search( 'Property Brochures Link', $widgets );
+            if ( $desc_position !== false )
+            {
+                array_splice($widgets, $desc_position+1, 0, 'Property Home Report Link');
+            }
+            else
+            {
+                $widgets[] = 'Property Home Report Link';
+            }
+        }
+        return $widgets;
+    }
+
+    public function select_home_report_elementor_widget_directory( $widget_dir, $widget )
+    {
+        if ( $widget == 'Property Home Report Link' )
+        {
+            $widget_dir = dirname(__FILE__) . '/includes/elementor-widgets';
+        }
+        return $widget_dir;
     }
 
     public function ajax_propertyhive_home_report_request()
