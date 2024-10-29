@@ -628,7 +628,7 @@ final class PH_Home_Reports {
                         // Check for download errors
                         if ( is_wp_error( $tmp ) ) 
                         {
-                            @unlink( $file_array[ 'tmp_name' ] );
+                            //@unlink( $file_array[ 'tmp_name' ] );
 
                             //$this->add_error( 'An error occurred whilst importing ' . $url . '. The error was as follows: ' . $tmp->get_error_message(), $property['RoleId'] );
                         }
@@ -757,7 +757,7 @@ final class PH_Home_Reports {
                         // Check for download errors
                         if ( is_wp_error( $tmp ) ) 
                         {
-                            @unlink( $file_array[ 'tmp_name' ] );
+                            //@unlink( $file_array[ 'tmp_name' ] );
 
                             //$this->add_error( 'An error occurred whilst importing ' . $url . '. The error was as follows: ' . $tmp->get_error_message(), $property['RoleId'] );
                         }
@@ -894,7 +894,7 @@ final class PH_Home_Reports {
                                 // Check for download errors
                                 if ( is_wp_error( $tmp ) )
                                 {
-                                    @unlink( $file_array[ 'tmp_name' ] );
+                                    //@unlink( $file_array[ 'tmp_name' ] );
                                 }
                                 else
                                 {
@@ -1059,7 +1059,7 @@ final class PH_Home_Reports {
                         // Check for download errors
                         if ( is_wp_error( $tmp ) ) 
                         {
-                            @unlink( $file_array[ 'tmp_name' ] );
+                            //@unlink( $file_array[ 'tmp_name' ] );
 
                             //$this->add_error( 'An error occurred whilst importing ' . $url . '. The error was as follows: ' . $tmp->get_error_message(), $property['RoleId'] );
                         }
