@@ -1,5 +1,7 @@
 var ph_hr_is_submitting = false;
 var ph_hr_form_obj;
+var ph_hr_form_button_obj;
+var ph_hr_form_button_original_value = '';;
 jQuery( function($){
 
     // Enquiry form being submitted
@@ -8,6 +10,11 @@ jQuery( function($){
         if (!ph_hr_is_submitting)
         {
             ph_hr_is_submitting = true;
+
+            ph_hr_form_button_obj = $(this);
+            ph_hr_form_button_original_value = ph_hr_form_button_obj.find('input[type=\'submit\']').val();
+            ph_hr_form_button_obj.find('input[type=\'submit\']').val('Submitting...');
+            ph_hr_form_button_obj.find('input[type=\'submit\']').prop('disabled', 'disabled');
 
             var data = $(this).serialize() + '&'+$.param({ 'action': 'propertyhive_request_home_report' });
 
@@ -18,6 +25,9 @@ jQuery( function($){
             ph_hr_form_obj.find('#hrEnquiryError').hide();
 
             $.post( propertyhive_home_reports_params.ajax_url, data, function(response) {
+
+                ph_hr_form_button_obj.find('input[type=\'submit\']').val(ph_hr_form_button_original_value);
+                ph_hr_form_button_obj.find('input[type=\'submit\']').prop('disabled', false);
 
                 if (response.success == true)
                 {
