@@ -2,9 +2,9 @@
 Contributors: PropertyHive,BIOSTALL
 Tags: home report, scotland, propertyhive, property hive, property, real estate, software, estate agents, estate agent
 Requires at least: 3.8
-Tested up to: 6.7.2
+Tested up to: 6.8
 Stable tag: trunk
-Version: 1.0.12
+Version: 1.0.13
 Homepage: https://wp-property-hive.com/addons/home-reports/
 
 This add on for Property Hive adds the ability for your users to upload home reports to properties
@@ -28,6 +28,11 @@ The manual installation method involves downloading the Property Hive Home Repor
 Updating should work like a charm; as always though, ensure you backup your site just in case.
 
 == Changelog ==
+
+= 1.0.13 =
+* Disable submit button and change button label to 'Submitting...' when data capture is enabled and someone submits the form to give a better indication that something is happening
+* Correct PHP undefined index error
+* Declared support for WordPress 6.8
 
 = 1.0.12 =
 * Import home reports from Apex27 XML imports where HIPS contains caption 'Home Report'
