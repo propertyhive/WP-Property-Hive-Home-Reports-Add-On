@@ -151,7 +151,7 @@ final class PH_Home_Reports {
         {
             $form_controls = $this->data_capture_form_fields();
 
-            $form_controls = apply_filters( 'propertyhive_property_home_report_form_fields', $form_controls, $property->id );
+            $form_controls = apply_filters( 'propertyhive_property_home_report_form_fields', $form_controls, (int)$_POST['property_id']  );
 
         }
         
